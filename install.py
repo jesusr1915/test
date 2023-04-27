@@ -50,8 +50,8 @@ def prepare(rType="MAIN"):
     global rPackages
     if rType <> "MAIN": rPackages = rPackages[:-3]
     printc("Preparing Installation")
-    for rFile in ["/var/lib/dpkg/lock-frontend", "/var/cache/apt/archives/lock", "/var/lib/dpkg/lock"]:
-        try: os.remove(rFile)
+    for rFile in ["sudo rm /var/lib/dpkg/lock-frontend", "sudo rm /var/cache/apt/archives/lock", "sudo rm /var/lib/dpkg/lock"]:
+        try: subprocess.check_call(rFile, shell=True)
         except: pass
     #os.system("apt-get update > /dev/null")
     subprocess.check_call("sudo apt-get update > /dev/null", shell=True)
@@ -72,7 +72,7 @@ def prepare(rType="MAIN"):
         # Create User
         printc("Creating user xtreamcodes")
         subprocess.check_call("sudo adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null", shell=True)
-    if not os.path.exists("/home/xtreamcodes"): os.mkdir("/home/xtreamcodes")
+    if not os.path.exists("/home/xtreamcodes"): subprocess.check_call("sudo mkdir /home/xtreamcodes", shell=True)
     return True
 
 def install(rType="MAIN"):
@@ -103,11 +103,11 @@ def installadminpanel():
         try: is_ok = zipfile.ZipFile("/tmp/update.zip")
         except:
             printc("Invalid link or zip file is corrupted!", col.FAIL)
-            os.remove("/tmp/update.zip")
+            subprocess.check_call("sudo rm /tmp/update.zip", shell=True)
             return False
     printc("Installing Admin Panel")
     subprocess.check_call('unzip -o /tmp/update.zip -d /tmp/update/ > /dev/null && cp -rf /tmp/update/XtreamUI-master/* /home/xtreamcodes/iptv_xtream_codes/ > /dev/null && rm -rf /tmp/update/XtreamUI-master > /dev/null && rm -rf /tmp/update > /dev/null && chown -R xtreamcodes:xtreamcodes /home/xtreamcodes > /dev/null', shell=True)
-    try: os.remove("/tmp/update.zip")
+    try: subprocess.check_call("sudo rm /tmp/update.zip")
     except: pass
     rURL2 = "https://bitbucket.org/emre1393/xtreamui_mirror/downloads/newstuff.zip"
     printc("Downloading New Stuff for Admin Panel")  
@@ -116,7 +116,7 @@ def installadminpanel():
         try: is_ok = zipfile.ZipFile("/tmp/update2.zip")
         except:
             printc("Invalid link or zip file is corrupted!", col.FAIL)
-            os.remove("/tmp/update2.zip")
+            subprocess.check_call("sudo rm /tmp/update2.zip", shell=True)
             return False
         printc("Installing New Stuff for Admin Panel")
         subprocess.check_call('sudo unzip -o /tmp/update2.zip -d /tmp/update2/ > /dev/null && cp -rf /tmp/update2/* /home/xtreamcodes/iptv_xtream_codes/ > /dev/null && rm -rf /tmp/update2/* > /dev/null && rm -rf /tmp/update2 > /dev/null && chown -R xtreamcodes:xtreamcodes /home/xtreamcodes/ > /dev/null > /dev/null', shell=True)
@@ -165,7 +165,7 @@ def mysql(rUsername, rPassword):
                         subprocess.check_call('sudo echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.1" > /etc/mysql/mysqld', shell=True)
                         subprocess.check_call('sudo echo "%s" > /lib/systemd/system/mysql.service' % rMySQLServiceFile, shell=True)
                         subprocess.check_call('sudo systemctl daemon-reload; systemctl restart mysql.service;', shell=True)
-            try: os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
+            try: subprocess.check_call("sudo rm /home/xtreamcodes/iptv_xtream_codes/database.sql", shell=True)
             except: pass
             return True
         except: printc("Invalid password! Try again", col.FAIL)
@@ -173,7 +173,7 @@ def mysql(rUsername, rPassword):
 
 def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase="xtream_iptvpro", rServerID=1, rPort=7999):
     printc("Encrypting...")
-    try: os.remove("/home/xtreamcodes/iptv_xtream_codes/config")
+    try: subprocess.check_call("sudo rm /home/xtreamcodes/iptv_xtream_codes/config", shell=True)
     except: pass
     rf = open('/home/xtreamcodes/iptv_xtream_codes/config', 'wb')
     rf.write(''.join(chr(ord(c)^ord(k)) for c,k in izip('{\"host\":\"%s\",\"db_user\":\"%s\",\"db_pass\":\"%s\",\"db_name\":\"%s\",\"server_id\":\"%d\", \"db_port\":\"%d\", \"pconnect\":\"0\"}' % (rHost, rUsername, rPassword, rDatabase, rServerID, rPort), cycle('5709650b0d7806074842c6de575025b1'))).encode('base64').replace('\n', ''))
@@ -193,9 +193,9 @@ def configure():
         rFile.close()
         os.system("chmod +x /etc/init.d/xtreamcodes > /dev/null")
     os.system("mount -a")
-    try: os.remove("/usr/bin/ffmpeg")
+    try: subprocess.check_call("sudo rm /usr/bin/ffmpeg", shell=True)
     except: pass
-    if not os.path.exists("/home/xtreamcodes/iptv_xtream_codes/tv_archive"): os.mkdir("/home/xtreamcodes/iptv_xtream_codes/tv_archive/")
+    if not os.path.exists("/home/xtreamcodes/iptv_xtream_codes/tv_archive"): subprocess.check_call("sudo mkdir /home/xtreamcodes/iptv_xtream_codes/tv_archive/", shell=True)
     os.system("ln -s /home/xtreamcodes/iptv_xtream_codes/bin/ffmpeg /usr/bin/")
     os.system("chown xtreamcodes:xtreamcodes -R /home/xtreamcodes > /dev/null")
     os.system("chmod -R 0777 /home/xtreamcodes > /dev/null")
